@@ -103,4 +103,22 @@ public class GameScript : MonoBehaviour {
 		this.fish.Add (fish);
 	}
 
+
+	public void fishEatAI(){
+		if (fish.Count ==0) {
+			return;
+		}	
+
+		int f = (int)UnityEngine.Random.Range(0, fishs.Count);
+		GameObject fish = fish [f];
+		int c =(int) UnityEngine.Random.Range (0, corals.Count);
+		GameObject coral = fish [c];
+		fish.GetComponent<FishScript> ().SendMessage ("setTarget", coral.transform);
+		Debug.Log ("Fish EAT AI trigged");
+
+	}
+
+
+
+
 }
