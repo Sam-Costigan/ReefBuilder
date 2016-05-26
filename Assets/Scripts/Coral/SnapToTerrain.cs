@@ -34,8 +34,6 @@ public class SnapToTerrain : MonoBehaviour {
 	public Vector3 initialEulerRotation = new Vector3 (0, 0, 0);
 	public Vector3 positionOffset = new Vector3(0, 0, 0);
 
-    private Vector2 mobileDragOffset = new Vector2(0, Screen.height/10f);
-
 	private float rotationSpeed = 50f;
 	private float rotAroundForward = 0f;
 
@@ -79,12 +77,6 @@ public class SnapToTerrain : MonoBehaviour {
         float defaultDist = defaultDistanceFromCamera;
         RaycastHit hit;
 
-
-        if (Application.isMobilePlatform)
-        {
-            screenPos += mobileDragOffset;
-        }
-
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
 
         GameObject[] rocks = GameObject.FindGameObjectsWithTag("Rock");
@@ -109,7 +101,6 @@ public class SnapToTerrain : MonoBehaviour {
 				transform.Rotate (initialEulerRotation);
 				transform.RotateAround (transform.position, smoothNormal, rotAroundForward += rotationSpeed * Time.deltaTime);
 				transform.Translate (positionOffset);
-                GetComponent<SpawnPolyps>().normal = smoothNormal;
                 onTerrain = true;
             }   
         }

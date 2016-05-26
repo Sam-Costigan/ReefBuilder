@@ -17,6 +17,8 @@ public class MouseOrbit : MonoBehaviour
     public float distanceMin = 5f;
     public float distanceMax = 40f;
 
+
+
     private Rigidbody rigidbody;
 
 	float x = 0.0f;
@@ -33,7 +35,7 @@ public class MouseOrbit : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
+		
         xDeltas = new List<float>(5);
         yDeltas = new List<float>(5);
 
@@ -57,6 +59,14 @@ public class MouseOrbit : MonoBehaviour
         Orbit(target);
     }
 
+	void Update(){
+
+	//	Debug.Log ("target "+target.name);
+	}
+
+
+
+
     void LateUpdate()
     {
 		if (locked)
@@ -78,99 +88,91 @@ public class MouseOrbit : MonoBehaviour
 
     private void OrbitMouse(Transform target)
     {
-		if (target)
-        {
+		if (target) {
+			
+			float lastX = x;
+			float lastY = y;
+			float lastDistance = distance;
 
-            float lastX = x;
-            float lastY = y;
-            float lastDistance = distance;
+			if (Input.GetMouseButton (0)) {
+				x += Input.GetAxis ("Mouse X") * xSpeed * distance * 0.5f;
+				y -= Input.GetAxis ("Mouse Y") * ySpeed * 0.5f;
+			}
 
-            if (Input.GetMouseButton(0))
-            {
-                x += Input.GetAxis("Mouse X") * xSpeed * distance * 0.5f;
-                y -= Input.GetAxis("Mouse Y") * ySpeed * 0.5f;
-            }
+			y = ClampAngle (y, yMinLimit, yMaxLimit);
 
-            y = ClampAngle(y, yMinLimit, yMaxLimit);
+			Quaternion rotation = Quaternion.Euler (y, x, 0);
 
-            Quaternion rotation = Quaternion.Euler(y, x, 0);
+			distance = Mathf.Clamp (distance - Input.GetAxis ("Mouse ScrollWheel") * 5, distanceMin, distanceMax);
 
-            distance = Mathf.Clamp(distance - Input.GetAxis("Mouse ScrollWheel") * 5, distanceMin, distanceMax);
-
-            RaycastHit hit;
-            if (Physics.Linecast(target.position, transform.position, out hit))
-            {
-                 //distance -= hit.distance;
-            }
-            Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
-            Vector3 position = rotation * negDistance + target.position;
+			RaycastHit hit;
+			if (Physics.Linecast (target.position, transform.position, out hit)) {
+				//distance -= hit.distance;
+			}
+			Vector3 negDistance = new Vector3 (0.0f, 0.0f, -distance);
+			Vector3 position = rotation * negDistance + target.position;
       
-            if (isTooCloseToObject(position) && position.y < transform.position.y)
-            {
-                //Get rid of changes if we're too close to terrain.
-                x = lastX;
-                y = lastY;
-                distance = lastDistance;
-                return;
-            }
+			if (isTooCloseToObject (position) && position.y < transform.position.y) {
+				//Get rid of changes if we're too close to terrain.
+				x = lastX;
+				y = lastY;
+				distance = lastDistance;
+				return;
+			}
 
-            transform.rotation = rotation;
-            transform.position = position;
-        }
-    }
+			transform.rotation = rotation;
+			transform.position = position;
+		} 
+	}
 
     private void Orbit(Transform target)
     {
-        if (target)
-        {
+		if (target) {
+			
+			float lastX = x;
+			float lastY = y;
+			float lastDistance = distance;
 
-            float lastX = x;
-            float lastY = y;
-            float lastDistance = distance;
+			Quaternion rotation = transform.rotation;
 
-            Quaternion rotation = transform.rotation;
+			if (Input.touchCount == 1) {
 
-            if (Input.touchCount == 1)
-            {
+				xDeltas.Add (Input.GetTouch (0).deltaPosition.x * xSpeed * distance * Time.deltaTime);
+				yDeltas.Add (Input.GetTouch (0).deltaPosition.y * ySpeed * Time.deltaTime);
 
-                xDeltas.Add(Input.GetTouch(0).deltaPosition.x * xSpeed * distance * Time.deltaTime);
-                yDeltas.Add(Input.GetTouch(0).deltaPosition.y * ySpeed * Time.deltaTime);
+				xDeltas.RemoveAt (0);
+				yDeltas.RemoveAt (0);
 
-                xDeltas.RemoveAt(0);
-                yDeltas.RemoveAt(0);
+				x += mean (xDeltas);
+				y -= mean (yDeltas);
 
-                x += mean(xDeltas);
-                y -= mean(yDeltas);
+				y = ClampAngle (y, yMinLimit, yMaxLimit);
+				rotation = Quaternion.Euler (y, x, 0);
+			}
 
-                y = ClampAngle(y, yMinLimit, yMaxLimit);
-                rotation = Quaternion.Euler(y, x, 0);
-            }
+			distance = GetComponent<PinchZoom> ().distance;
 
-            distance = GetComponent<PinchZoom>().distance;
+			RaycastHit hit;
+			if (Physics.Linecast (target.position, transform.position, out hit)) {
+				// distance -= hit.distance;
+			}
+			Vector3 negDistance = new Vector3 (0.0f, 0.0f, -distance);
+			Vector3 position = rotation * negDistance + target.position;
 
-            RaycastHit hit;
-            if (Physics.Linecast(target.position, transform.position, out hit))
-            {
-               // distance -= hit.distance;
-            }
-            Vector3 negDistance = new Vector3(0.0f, 0.0f, -distance);
-            Vector3 position = rotation * negDistance + target.position;
-
-            if (isTooCloseToObject(position) && position.y < transform.position.y)
-            {
-                //Get rid of changes if we're too close to terrain.
-                x = lastX;
-                y = lastY;
-                distance = lastDistance;
-                return;
-            }
+			if (isTooCloseToObject (position) && position.y < transform.position.y) {
+				//Get rid of changes if we're too close to terrain.
+				x = lastX;
+				y = lastY;
+				distance = lastDistance;
+				return;
+			}
 
 
-            transform.rotation = rotation;
-            transform.position = position;
+			transform.rotation = rotation;
+			transform.position = position;
 
-        }
-    }
+		} 
+	}
 
     private bool isTooCloseToObject(Vector3 position)
     {

@@ -15,6 +15,14 @@ public class MoveRandomPaths : MonoBehaviour {
 
     public bool positiveZ = false;
     public Vector3 initialMove = new Vector3(0, 0, 0);
+	const int  EATMODE = 1;
+	const int MOVETOMODE =2;
+	const int  RANDMODE = 0;
+	int mode =RANDMODE;
+
+	Transform target;
+
+
 	// Use this for initialization
 	void Start () {
         transform.Translate(initialMove);
@@ -61,4 +69,35 @@ public class MoveRandomPaths : MonoBehaviour {
         }
 
     }
+
+	public void setTarget(Transform target){
+		this.target = target;
+		mode = EATMODE;
+	}
+
+	public void moveToTarget(){
+		float runtime = Time.time;
+
+		float currYRot = (Mathf.Sin(runtime)+2f)*yRot;
+
+		if (positiveZ)
+		{
+			speed = -speed;
+		}
+
+		transform.Translate(target.position.x, target.position.y, -speed * Time.deltaTime);
+
+
+
+		transform.Rotate(new Vector3(xRot, currYRot, zRot) * Time.deltaTime);
+
+		if (positiveZ)
+		{
+			speed = -speed;
+		}
+
+	}
+
+
+
 }

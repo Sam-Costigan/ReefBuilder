@@ -72,7 +72,6 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 		// cost. If it wasn't, destroy the created object.
 		if (placed) {
 			gameScript.removePolyps (coralScript.getCost());
-			coralScript.setPlaced (true);
 		} else {
 			Destroy (coral.gameObject);
 		}
